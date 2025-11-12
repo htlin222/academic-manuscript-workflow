@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Validate DOIs and URLs from BibTeX references.
-This script checks if DOIs resolve correctly and URLs return valid responses.
+This script checks if DOIs resolve correctly using Crossref API and URLs return valid responses.
 Results are logged to log.txt with timestamps.
 
 Usage: uv run validate_references.py
@@ -60,19 +60,77 @@ def parse_bib_file(file_path):
     return entries, dois, urls
 
 
-def validate_doi(session, doi):
-    """Validate a DOI by checking if it resolves."""
+def validate_doi_format(doi):
+    """Validate DOI format using regex."""
     if not doi:
         return False, "Empty DOI"
 
     # Clean DOI
     doi = doi.strip()
+
+    # DOI format: 10.xxxx/xxxxx
+    doi_pattern = r"^10\.\d{4,}/[^\s]+$"
+    if re.match(doi_pattern, doi):
+        return True, "Valid DOI format"
+    else:
+        return False, "Invalid DOI format"
+
+
+def validate_doi_crossref(session, doi):
+    """Validate DOI using Crossref API."""
+    if not doi:
+        return False, "Empty DOI"
+
+    # Clean DOI
+    doi = doi.strip()
+
+    # First check format
+    format_valid, format_msg = validate_doi_format(doi)
+    if not format_valid:
+        return False, format_msg
+
+    # Check with Crossref API
+    crossref_url = f"https://api.crossref.org/works/{doi}"
+
+    try:
+        response = session.get(crossref_url, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            if "message" in data and "title" in data["message"]:
+                title = data["message"]["title"][0][:60]
+                return True, f"Valid DOI - {title}..."
+            else:
+                return True, "Valid DOI (no title available)"
+        elif response.status_code == 404:
+            return False, "DOI not found in Crossref database"
+        else:
+            return False, f"Crossref API error (status: {response.status_code})"
+    except requests.exceptions.Timeout:
+        return False, "Crossref API timeout"
+    except requests.exceptions.ConnectionError:
+        return False, "Crossref API connection error"
+    except Exception as e:
+        return False, f"Crossref validation error: {str(e)}"
+
+
+def validate_doi(session, doi):
+    """Validate DOI using Crossref API with fallback to direct resolution."""
+    # Try Crossref API first (more reliable)
+    success, message = validate_doi_crossref(session, doi)
+    if success:
+        return success, message
+
+    # Fallback to direct DOI resolution if Crossref fails
+    if not doi:
+        return False, "Empty DOI"
+
+    doi = doi.strip()
     doi_url = f"https://doi.org/{doi}"
 
     try:
-        response = session.head(doi_url, timeout=30, allow_redirects=True)
+        response = session.head(doi_url, timeout=60, allow_redirects=True)
         if response.status_code == 200:
-            return True, f"DOI resolves correctly (status: {response.status_code})"
+            return True, f"DOI resolves directly (status: {response.status_code})"
         else:
             return False, f"DOI failed with status: {response.status_code}"
     except requests.exceptions.Timeout:
@@ -92,7 +150,7 @@ def validate_url(session, url):
     url = url.strip()
 
     try:
-        response = session.head(url, timeout=30, allow_redirects=True)
+        response = session.head(url, timeout=10, allow_redirects=True)
         if response.status_code == 200:
             return True, f"URL accessible (status: {response.status_code})"
         else:
@@ -153,8 +211,8 @@ def main():
             else:
                 log_result(log_file, f"❌ {message}")
 
-            # Rate limiting
-            time.sleep(0.5)
+            # Rate limiting - longer delay for Crossref API
+            time.sleep(1.0)
 
         # Validate URLs
         log_result(log_file, "\n--- Validating URLs ---")
@@ -169,8 +227,8 @@ def main():
             else:
                 log_result(log_file, f"❌ {message}")
 
-            # Rate limiting
-            time.sleep(0.5)
+            # Rate limiting - longer delay for Crossref API
+            time.sleep(1.0)
 
         # Summary
         log_result(log_file, "\n=== Validation Summary ===")
