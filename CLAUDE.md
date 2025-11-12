@@ -1,321 +1,106 @@
-# Academic Manuscript Citation Workflow - Claude Code Instructions
+# Citation Workflow for Claude Code
 
-**For Claude Code LLM**: This project automates academic manuscript writing with proper citations, reference validation, and multi-format output generation.
+## Simple Workflow
 
-## 🚀 Quick Start for Claude Code Users
+When user says "read the CLAUDE.md, start your job":
 
-When a user asks for help with academic writing, citations, or manuscript preparation:
+1. **Read manuscript.md** - Find numbered citations (1, 2, 3, etc.)
+2. **Convert citations** - Change numbers to `[@AuthorYear]` format
+3. **Add to reference.bib** - Create BibTeX entries for each citation
+4. **Generate output** - Run `make all` to create formatted documents
 
-1. **Initialize the project**:
+## Step-by-Step Process
 
-   ```bash
-   make init
-   ```
-
-   This creates working files with a breast cancer research example.
-
-2. **Web search for references** when user needs citations:
-   - Use WebSearch to find recent academic papers on the user's topic
-   - Focus on high-impact journals, recent publications (2020+)
-   - Search for DOI numbers and official URLs
-   - Prioritize systematic reviews, clinical trials, meta-analyses
-
-3. **Add citations to manuscript**:
-   - Edit `manuscript.md` with user's content
-   - Add citations using format: `[@AuthorYear]`
-   - Ensure citation keys match entries in `reference.bib`
-
-4. **Update bibliography**:
-   - Add new references to `reference.bib` following BibTeX format
-   - Include DOI and URL when available
-   - Use consistent naming: `FirstAuthorLastNameYear`
-
-5. **Generate outputs**:
-   ```bash
-   make all
-   ```
-   This validates references and creates HTML/DOCX with AMA citations.
-
-## 📖 Detailed Workflow Instructions
-
-### Step 1: Project Initialization
+### Step 1: Read Current Manuscript
 
 ```bash
-# Check project status
-make status
-
-# Initialize if needed
-make init
-
-# View available commands
-make help
+# Read the manuscript to find what needs citations
+cat manuscript.md
 ```
 
-### Step 2: Web Search Strategy
+### Step 2: Identify What Needs Citations
 
-When searching for academic references:
+**Case A: Numbered citations exist**
 
-**Search Queries to Use**:
+- Look for: `cancer.1`, `trials.3-5`, `analysis.6`
+- Convert numbers to `[@AuthorYear]` format
 
-- `"[topic]" systematic review 2023 2024`
-- `"[topic]" clinical trial recent results`
-- `"[topic]" meta-analysis latest findings`
-- `"[topic]" guidelines 2024 update`
+**Case B: Plain text without citations**
 
-**Quality Indicators**:
+- Look for factual claims that need support:
+  - Statistics: "30% of patients...", "Studies show..."
+  - Medical facts: "Treatment improves outcomes"
+  - Guidelines: "Standard care includes..."
+  - Research findings: "Results demonstrate..."
+- Add citations where evidence is needed
 
-- DOI present and resolvable
-- High-impact journals (Nature, NEJM, Lancet, JAMA, etc.)
-- Recent publication dates (2020-2024)
-- Systematic reviews over case reports
-- Multi-center studies over single-center
+### Step 3: Search for Appropriate References
 
-**Information to Capture**:
+For each claim needing citation:
 
-- Full title
-- All authors (first 3-5 + "et al." if many)
-- Journal name and abbreviation
-- Volume, issue, pages
-- Publication year
-- DOI (essential)
-- PubMed ID if available
+1. **Use WebSearch** with specific terms
+2. **Search patterns**:
+   - `"breast cancer survival rates 2024"`
+   - `"postmastectomy radiotherapy guidelines"`
+   - `"stage II breast cancer treatment"`
+3. **Find quality sources**: Recent papers, guidelines, systematic reviews
 
-### Step 3: Citation Integration Process
+### Step 4: Convert to Citation Format
 
-**A. Manuscript Editing**:
+**From numbered**: `cancer.1` → `cancer [@Smith2024].`
+**Add new**: `Survival rates improve` → `Survival rates improve [@Johnson2024].`
 
-```markdown
-# Example integration
+### Step 5: Create BibTeX Entries
 
-Recent studies show improved outcomes [@Smith2024].
-Multiple trials confirm this finding [@Smith2024; @Jones2023; @Brown2022].
-As demonstrated by Smith et al. [@Smith2024], the treatment...
-```
-
-**B. BibTeX Reference Format**:
+Add to `reference.bib`:
 
 ```bibtex
 @article{Smith2024,
-  title={Title of the Research Paper},
-  author={Smith, John and Jones, Mary and Brown, David},
-  journal={Journal of Medical Research},
-  volume={45},
-  number={3},
-  pages={123--135},
+  title={Title from web search},
+  author={Smith, John and Jones, Mary},
+  journal={Journal Name},
   year={2024},
-  doi={10.1000/example.2024.123},
-  url={https://journal.example.com/article/2024/123}
+  doi={10.1000/example}
 }
 ```
 
-### Step 4: Validation and Output Generation
-
-**Run the complete workflow**:
+### Step 6: Generate Final Documents
 
 ```bash
-# Validate all references
-make validate
-
-# Convert to outputs
-make convert
-
-# Or do both at once
 make all
 ```
 
-**Check validation results**:
+## Web Search Tips
+
+When searching for references:
+
+- Use WebSearch tool to find recent papers (2020+)
+- Search: `"[topic]" systematic review 2024`
+- Get DOI numbers for each reference
+- Prioritize high-impact journals (Nature, NEJM, Lancet)
+
+## Example Citation Conversion
+
+Current manuscript has: `cancer.1`
+
+1. **Search** for the paper using WebSearch
+2. **Convert** to: `cancer [@Smith2024].`
+3. **Add BibTeX**:
+
+```bibtex
+@article{Smith2024,
+  title={Breast Cancer Treatment Guidelines},
+  author={Smith, John and Jones, Mary},
+  journal={New England Journal of Medicine},
+  year={2024},
+  doi={10.1056/NEJMoa2024123}
+}
+```
+
+## Commands
 
 ```bash
-# View validation log
-cat output/log.txt
-
-# Check output files
-ls output/
+make all     # Generate final documents
+make validate # Check references
+make help    # Show all options
 ```
-
-## 🛠️ Common Tasks and Commands
-
-### For Literature Reviews
-
-```bash
-# 1. Initialize with working example
-make init
-
-# 2. Research and add 15-30 recent references via WebSearch
-# 3. Update manuscript.md with comprehensive content
-# 4. Generate outputs
-make all
-```
-
-### For Original Research Papers
-
-```bash
-# 1. Initialize project
-make init
-
-# 2. Replace template with research content
-# 3. Search for methodology references
-# 4. Add discussion citations from recent literature
-# 5. Generate final outputs
-make all
-```
-
-### For Clinical Guidelines
-
-```bash
-# 1. Initialize project
-make init
-
-# 2. Focus WebSearch on:
-#    - Professional society guidelines
-#    - Government health agencies
-#    - Recent systematic reviews
-# 3. Emphasize high-evidence sources
-# 4. Generate outputs
-make all
-```
-
-## 🔍 Web Search Best Practices
-
-### Search Methodology
-
-1. **Start broad, then narrow**:
-   - `"cancer treatment 2024"` → `"immunotherapy breast cancer 2024"`
-
-2. **Use medical subject headings**:
-   - Include MeSH terms when possible
-   - Use official drug names and generic names
-
-3. **Prioritize source types**:
-   - Cochrane reviews (highest evidence)
-   - Systematic reviews and meta-analyses
-   - Randomized controlled trials
-   - Clinical guidelines from professional societies
-   - Government health agency reports
-
-4. **Validate sources**:
-   - Check journal impact factor
-   - Verify author affiliations
-   - Ensure peer review process
-   - Confirm recent publication date
-
-### Reference Quality Checklist
-
-- ✅ DOI resolves correctly
-- ✅ Published in peer-reviewed journal
-- ✅ Authors from reputable institutions
-- ✅ Methods clearly described
-- ✅ Appropriate sample size
-- ✅ Conflicts of interest declared
-- ✅ Recent publication (unless historical context needed)
-
-## 📋 File Management
-
-### Project Structure
-
-```
-academic-manuscript-workflow/
-├── 📄 manuscript.md              # Working manuscript
-├── 📚 reference.bib              # Bibliography database
-├── 📋 CLAUDE.md                  # This instruction file
-├── 📖 README.md                  # User documentation
-├── 📋 Makefile                   # Automation commands
-├── 🚫 .gitignore                 # Git exclusions
-├── ⚙️ pyproject.toml             # Python configuration
-│
-├── 📂 scripts/
-│   ├── 🔍 validate_references.py # DOI/URL validation
-│   └── 📝 ama.csl                # AMA citation style
-│
-├── 📂 output/                    # Generated files
-│   ├── 🌐 manuscript.html        # Web format
-│   ├── 📄 manuscript.docx        # Word format
-│   └── 📊 log.txt                # Validation log
-│
-└── 📄 Templates:
-    ├── manuscript.template.md     # Manuscript template
-    └── reference.template.bib     # Bibliography template
-```
-
-### File Purposes
-
-- **`manuscript.md`** - Main working document with citations
-- **`reference.bib`** - All references in BibTeX format
-- **`output/`** - Generated HTML/DOCX files with formatted citations
-- **Templates** - Starting points for new projects
-
-## ⚠️ Important Notes for Claude Code
-
-### Citation Style
-
-- **Uses AMA style** - numbered superscripts in text
-- **Vancouver format** bibliography
-- **Pandoc citeproc** for processing
-
-### Validation Behavior
-
-- **403 errors are normal** - many publishers block automated requests
-- **Focus on DOI validity** - more important than URL accessibility
-- **Log all results** - helps users understand validation status
-
-### Error Handling
-
-```bash
-# If pandoc fails
-make check-deps
-
-# If references invalid
-make validate
-cat output/log.txt
-
-# If files missing
-make status
-make init
-```
-
-### Dependencies Required
-
-- **Pandoc** - document conversion
-- **uv** - Python package management
-- **Python 3.9+** - for validation script
-
-## 🎯 Success Criteria
-
-A successful manuscript should have:
-
-- ✅ Proper AMA-style numbered citations
-- ✅ Complete bibliography with DOIs
-- ✅ Clean HTML and DOCX outputs
-- ✅ Validated references (some 403s acceptable)
-- ✅ Professional formatting
-- ✅ Recent, high-quality sources
-
-## 🚀 Pro Tips for Efficiency
-
-1. **Batch similar tasks**:
-   - Search for all methodology references at once
-   - Add all discussion citations together
-   - Validate references in groups
-
-2. **Use make targets effectively**:
-
-   ```bash
-   make validate    # Check references only
-   make convert     # Generate outputs only
-   make clean       # Reset outputs
-   make help        # Show all options
-   ```
-
-3. **Leverage templates**:
-   - Start with `make init` for working example
-   - Modify existing content rather than starting blank
-   - Keep successful reference patterns
-
-4. **Quality over quantity**:
-   - 15-25 high-quality references > 50 mediocre ones
-   - Recent systematic reviews > old individual studies
-   - Peer-reviewed > preprints (unless cutting-edge)
-
----
-
-**Ready to help users**: This workflow enables rapid, professional academic writing with proper citations. Always start with `make init` and use WebSearch extensively to find current, high-quality references.

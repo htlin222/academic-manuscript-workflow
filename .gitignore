@@ -71,10 +71,9 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
-# Project specific - keep templates but ignore working files if they exist
-# Uncomment the following lines if you want to ignore working manuscript files
-# manuscript.md
-# reference.bib
+# Project specific - ignore working files, use templates instead
+manuscript.md
+reference.bib
 
 # Keep important template and configuration files
 !manuscript.template.md
